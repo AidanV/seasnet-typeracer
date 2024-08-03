@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/charmbracelet/bubbles/stopwatch"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
+	"golang.org/x/term"
 )
 
 // func InitialModel() model {
@@ -23,10 +26,11 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func InitialModel(profile termenv.Profile, fore termenv.Color, width, height int) model {
+func InitialModel(profile termenv.Profile, fore termenv.Color) model {
+	termWidth, termHeight, _ := term.GetSize(int(os.Stdin.Fd()))
 	return model{
-		width:  width,
-		height: height,
+		width:  termWidth,
+		height: termHeight,
 		test: Test{
 			stopwatch: TestStopwatch{
 				stopwatch: stopwatch.New(),
