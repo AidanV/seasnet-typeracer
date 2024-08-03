@@ -30,9 +30,17 @@ type model struct {
 type Test struct {
 	stopwatch     TestStopwatch
 	wpmEachSecond []float64
+	inputBuffer   []rune
+	wordsToEnter  []rune
 	results       Results
 	cursor        int
 	completed     bool
+	mistakes      mistakes
+}
+
+type mistakes struct {
+	mistakesAt     map[int]bool
+	rawMistakesCnt int
 }
 
 type TestStopwatch struct {
