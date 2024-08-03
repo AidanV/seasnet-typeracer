@@ -1,33 +1,53 @@
 package cmd
 
-import "fmt"
+import (
+	"math"
+	"strings"
+
+	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/reflow/wordwrap"
+)
 
 func (m model) View() string {
-	// The header
-	s := "What should we buy at the market?\n\n"
 
-	// Iterate over our choices
-	for i, choice := range m.choices {
+	var termWidth, termHeight = m.width, m.height
 
-		// Is the cursor pointing at this choice?
-		cursor := " " // no cursor
-		if m.cursor == i {
-			cursor = ">" // cursor!
-		}
-
-		// Is this choice selected?
-		checked := " " // not selected
-		if _, ok := m.selected[i]; ok {
-			checked = "x" // selected!
-		}
-
-		// Render the row
-		s += fmt.Sprintf("%s [%s] %s\n", cursor, checked, choice)
+	var coloredStopwatch string
+	if m.state.stopwatch.isRunning {
+		coloredStopwatch = style(state.stopwatch.stopwatch.View(), m.styles.runningTimer)
+	} else {
+		coloredStopwatch = style(state.stopwatch.stopwatch.View(), m.styles.stoppedTimer)
 	}
 
-	// The footer
-	s += "\nPress q to quit.\n"
+	paragraphView := state.base.paragraphView(lineLenLimit, m.styles)
+	lines := strings.Split(paragraphView, "\n")
+	cursorLine := findCursorLine(strings.Split(paragraphView, "\n"), state.base.cursor)
 
-	// Send the UI for rendering
-	return s
+	linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
+
+	s += positionVerticaly(termHeight)
+	avgLineLen := averageLineLen(lines)
+	indentBy := uint(math.Max(0, float64(termWidth/2-avgLineLen/2)))
+
+	s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
+
+	if !state.stopwatch.isRunning {
+		s += "\n\n\n"
+		s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart, ctrl+q to menu", m.styles.toEnter))
+	}
+}
+
+func wrapStyledParagraph(paragraph string, lineLimit int) string {
+	// XXX: Replace spaces, because wordwrap trims them out at the ends
+	paragraph = strings.ReplaceAll(paragraph, " ", "·")
+
+	f := wordwrap.NewWriter(lineLimit)
+	f.Breakpoints = []rune{'·'}
+	f.KeepNewlines = false
+	f.Write([]byte(paragraph))
+	f.Close()
+
+	paragraph = strings.ReplaceAll(f.String(), "·", " ")
+
+	return paragraph
 }
