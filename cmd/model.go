@@ -36,6 +36,7 @@ type Test struct {
 	cursor        int
 	completed     bool
 	mistakes      mistakes
+	rawInputCnt   int
 }
 
 type mistakes struct {
