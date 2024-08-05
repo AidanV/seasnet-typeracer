@@ -16,7 +16,7 @@ func (m model) View() string {
 
 	var termWidth, termHeight = m.width, m.height
 
-	lineLenLimit := 50
+	lineLenLimit := termWidth * 3 / 4
 
 	var coloredStopwatch string
 	if m.test.stopwatch.isRunning {

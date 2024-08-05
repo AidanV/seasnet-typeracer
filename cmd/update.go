@@ -71,7 +71,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					commands = append(commands, m.test.stopwatch.stopwatch.Init())
 					m.test.stopwatch.isRunning = true
 				}
-				handleRunes(msg, &m.test, m.test.mainMenu.config.Layout.Mappings)
+				handleRunes(msg, &m.test)
 
 			}
 		}
@@ -81,17 +81,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if len(m.test.wordsToEnter) == len(m.test.inputBuffer) {
 		termenv.DefaultOutput().Reset()
 
-		var results = state.calculateResults()
+		// var results = m.test.calculateResults()
 
-		PersistResults(results)
-
-		m.state = WordCountTestResults{
-			settings:      state.settings,
-			wpmEachSecond: state.base.wpmEachSecond,
-			wordCnt:       state.settings.wordCountSelections[state.settings.wordCountCursor],
-			results:       results,
-			mainMenu:      state.mainMenu,
-		}
+		// PersistResults(results)
 	}
 
 	// Return the updated model to the Bubble Tea runtime for processing.
