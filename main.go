@@ -4,8 +4,7 @@ import (
 	// "fmt"
 	// "os"
 	"sync"
-	client "typeracer/cmd/client"
-	server "typeracer/cmd/server"
+	nw "typeracer/cmd/networking"
 	// ui "typeracer/cmd/ui"
 	// tea "github.com/charmbracelet/bubbletea"
 	// "github.com/muesli/termenv"
@@ -15,11 +14,11 @@ func main() {
 
 	var wg sync.WaitGroup
 	go func() {
-		server.Server()
+		nw.Server()
 		wg.Done()
 	}()
 	go func() {
-		client.PostToServer()
+		nw.SendPlayerInfoToServer()
 		wg.Done()
 	}()
 	wg.Add(2)

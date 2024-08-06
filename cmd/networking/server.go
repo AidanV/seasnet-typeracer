@@ -16,24 +16,23 @@ func Server() {
 		fmt.Printf("Listen err %v\n", err)
 		os.Exit(-1)
 	}
+	defer server.Close()
 	fmt.Printf("Listen at %v\n", addr.String())
 
 	for {
 		p := make([]byte, 1024)
-		nn, raddr, err := server.ReadFromUDP(p)
+		nn, _, err := server.ReadFromUDP(p)
 		if err != nil {
 			fmt.Printf("Read err  %v", err)
 			continue
 		}
 
 		msg := p[:nn]
-		fmt.Printf("Received %v %s\n", raddr, msg)
-
-		go func(conn *net.UDPConn, raddr *net.UDPAddr, msg []byte) {
-			_, err := conn.WriteToUDP([]byte(fmt.Sprintf("Pong: %s", msg)), raddr)
-			if err != nil {
-				fmt.Printf("Response err %v", err)
-			}
-		}(server, raddr, msg)
+		playerInfo, err := DeSerialize(msg)
+		if err != nil {
+			fmt.Println("Failed to deserialize")
+			os.Exit(-1)
+		}
+		fmt.Printf("Name: %s\nPercent Completed: %d\nWPM: %d", playerInfo.Name, playerInfo.PercentCompleted, playerInfo.Wpm)
 	}
 }
