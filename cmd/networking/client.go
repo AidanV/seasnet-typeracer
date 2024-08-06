@@ -6,8 +6,12 @@ import (
 	"os"
 )
 
-func SendPlayerInfoToServer() {
-	conn, err := net.Dial("udp", "127.0.0.1:8000")
+func InitClient(port int) {
+	go client(port)
+}
+
+func client(port int) {
+	conn, err := net.Dial("udp", fmt.Sprintf("127.0.0.1:%v", port))
 	if err != nil {
 		fmt.Printf("Dial err %v", err)
 		os.Exit(-1)
@@ -34,6 +38,12 @@ func SendPlayerInfoToServer() {
 		fmt.Printf("Read err %v\n", err)
 		os.Exit(-1)
 	}
-
-	fmt.Printf("%v\n", string(p[:nn]))
+	playerInfos, err := DeSerializeList(p[:nn])
+	if err != nil {
+		fmt.Println("Failed to deserialize player infos response")
+		os.Exit(-1)
+	}
+	for _, pi := range playerInfos {
+		fmt.Printf("---\nName: %s\nPercent Completed: %d\nWPM: %d\n---\n", pi.Name, pi.PercentCompleted, pi.Wpm)
+	}
 }

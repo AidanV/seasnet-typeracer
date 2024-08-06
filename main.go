@@ -14,14 +14,14 @@ func main() {
 
 	var wg sync.WaitGroup
 	go func() {
-		nw.Server()
+		nw.InitServer(8000)
 		wg.Done()
 	}()
 	go func() {
-		nw.SendPlayerInfoToServer()
+		nw.InitClient(8000)
 		wg.Done()
 	}()
-	wg.Add(2)
+	wg.Add(3)
 	// p := tea.NewProgram(ui.InitialModel(termenv.ANSI256, termenv.ANSIWhite), tea.WithAltScreen())
 	// if _, err := p.Run(); err != nil {
 	// 	fmt.Printf("Alas, there's been an error: %v", err)

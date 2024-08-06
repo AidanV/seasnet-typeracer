@@ -12,7 +12,7 @@ type PlayerInfo struct {
 	Wpm              uint
 }
 
-func Serialize(p PlayerInfo) ([]byte, error) {
+func Serialize[P PlayerInfo | []PlayerInfo](p P) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	err := enc.Encode(p)
@@ -25,6 +25,17 @@ func Serialize(p PlayerInfo) ([]byte, error) {
 
 func DeSerialize(data []byte) (PlayerInfo, error) {
 	var playerInfo PlayerInfo
+	buf := bytes.NewBuffer(data)
+	dec := gob.NewDecoder(buf)
+	err := dec.Decode(&playerInfo)
+	if err != nil {
+		return playerInfo, err
+	}
+	return playerInfo, nil
+}
+
+func DeSerializeList(data []byte) ([]PlayerInfo, error) {
+	var playerInfo []PlayerInfo
 	buf := bytes.NewBuffer(data)
 	dec := gob.NewDecoder(buf)
 	err := dec.Decode(&playerInfo)
