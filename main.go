@@ -13,6 +13,7 @@ import (
 func main() {
 
 	var wg sync.WaitGroup
+	wg.Add(4)
 	go func() {
 		nw.InitServer(8000)
 		wg.Done()
@@ -21,7 +22,6 @@ func main() {
 		nw.InitClient(8000)
 		wg.Done()
 	}()
-	wg.Add(3)
 	// p := tea.NewProgram(ui.InitialModel(termenv.ANSI256, termenv.ANSIWhite), tea.WithAltScreen())
 	// if _, err := p.Run(); err != nil {
 	// 	fmt.Printf("Alas, there's been an error: %v", err)
