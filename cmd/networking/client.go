@@ -42,19 +42,19 @@ func getPlayerInfo() PlayerInfo {
 
 func readPlayerInfosOnInterval(tick time.Duration, conn net.Conn) {
 	for range time.Tick(tick) {
-		p := make([]byte, 1024)
-		nn, err := conn.Read(p)
-		if err != nil {
-			fmt.Printf("Read err %v\n", err)
-			os.Exit(-1)
-		}
-		playerInfos, err := DeSerializeList(p[:nn])
-		if err != nil {
-			fmt.Println("Failed to deserialize player infos response")
-			os.Exit(-1)
-		}
-		for _, pi := range playerInfos {
-			fmt.Printf("---\nName: %s\nPercent Completed: %d\nWPM: %d\n---\n", pi.Name, pi.PercentCompleted, pi.Wpm)
-		}
+		// p := make([]byte, 1024)
+		// nn, err := conn.Read(p)
+		// if err != nil {
+		// 	fmt.Printf("Read err %v\n", err)
+		// 	os.Exit(-1)
+		// }
+		// playerInfos, err := DeSerializeList(p[:nn])
+		// if err != nil {
+		// 	fmt.Println("Failed to deserialize player infos response")
+		// 	os.Exit(-1)
+		// }
+		// for _, pi := range playerInfos {
+		// 	fmt.Printf("---\nName: %s\nPercent Completed: %d\nWPM: %d\n---\n", pi.Name, pi.PercentCompleted, pi.Wpm)
+		// }
 	}
 }

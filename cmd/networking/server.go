@@ -59,7 +59,6 @@ func sendPlayerInfosOnInterval(tick time.Duration, playerInfos *sync.Map, conn *
 			pis = append(pis, pi.(PlayerInfo))
 			return true
 		})
-		fmt.Println(len(pis))
 		msg, err := Serialize(pis)
 		if err != nil {
 			fmt.Println("Failed to serialize response")
