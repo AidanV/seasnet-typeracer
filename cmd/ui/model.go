@@ -22,11 +22,17 @@ type Styles struct {
 }
 
 type model struct {
-	test   Test
-	styles Styles
-	width  int
-	height int
-	prog   progress.Model
+	test       Test
+	styles     Styles
+	width      int
+	height     int
+	progresses []PlayerProg
+}
+
+type PlayerProg struct {
+	prog progress.Model
+	name string
+	done bool
 }
 
 type Test struct {

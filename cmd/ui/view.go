@@ -42,7 +42,9 @@ func (m model) View() string {
 		s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart, ctrl+q to menu", m.styles.toEnter))
 	}
 	s += "\n\n"
-	s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, m.prog.ViewAs(0.5))
+	for i, prog := range m.progresses {
+		s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.prog.ViewAs(float64(i)/10.0)) + "\n"
+	}
 	return s
 }
 func positionVerticaly(termHeight int) string {

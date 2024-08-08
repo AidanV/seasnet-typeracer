@@ -73,6 +73,22 @@ func InitialModel(profile termenv.Profile, fore termenv.Color) model {
 				return termenv.String(str).Foreground(profile.Color("10")).Faint()
 			},
 		},
-		prog: progress.New(),
+		progresses: []PlayerProg{
+			{
+				prog: progress.New(),
+				name: "me",
+				done: false,
+			},
+			{
+				prog: progress.New(),
+				name: "aidan",
+				done: false,
+			},
+			{
+				prog: progress.New(),
+				name: "you",
+				done: false,
+			},
+		},
 	}
 }
