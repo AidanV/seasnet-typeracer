@@ -3,6 +3,7 @@ package cmd
 import (
 	"time"
 
+	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/stopwatch"
 	"github.com/muesli/termenv"
 )
@@ -25,6 +26,7 @@ type model struct {
 	styles Styles
 	width  int
 	height int
+	prog   progress.Model
 }
 
 type Test struct {

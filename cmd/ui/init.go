@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/stopwatch"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
@@ -72,5 +73,6 @@ func InitialModel(profile termenv.Profile, fore termenv.Color) model {
 				return termenv.String(str).Foreground(profile.Color("10")).Faint()
 			},
 		},
+		prog: progress.New(),
 	}
 }

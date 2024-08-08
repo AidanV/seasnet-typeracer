@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"math"
 	"regexp"
 	"sort"
@@ -43,7 +42,7 @@ func (m model) View() string {
 		s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart, ctrl+q to menu", m.styles.toEnter))
 	}
 	s += "\n\n"
-	s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, fmt.Sprintf("WPM: %f  Minutes elapsed %f", (m.test.calculateNormalizedWpm(m.test.stopwatch.stopwatch.Elapsed().Minutes())), m.test.stopwatch.stopwatch.Elapsed().Minutes()))
+	s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, m.prog.ViewAs(0.5))
 	return s
 }
 func positionVerticaly(termHeight int) string {
