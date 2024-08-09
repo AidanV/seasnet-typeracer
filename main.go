@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+
 	"os"
 	nw "typeracer/cmd/networking"
 	ui "typeracer/cmd/ui"
@@ -11,10 +13,14 @@ import (
 )
 
 func main() {
+	serverPtr := flag.Bool("server", false, "a bool")
+	flag.Parse()
 	p := tea.NewProgram(ui.InitialModel(termenv.ANSI256, termenv.ANSIWhite), tea.WithAltScreen())
-	go func() {
-		nw.InitServer(8000)
-	}()
+	if *serverPtr {
+		go func() {
+			nw.InitServer(8000)
+		}()
+	}
 	go func() {
 		nw.InitClient(8000, p)
 	}()
