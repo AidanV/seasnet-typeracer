@@ -38,7 +38,7 @@ func server(playerInfos *sync.Map, conn *net.UDPConn) {
 
 func handlePacket(playerInfos *sync.Map, p []byte, nn int, addr *net.UDPAddr) {
 	msg := p[:nn]
-	playerInfo, err := DeSerialize(msg)
+	playerInfo, err := DeSerialize[PlayerInfo](msg)
 	if err != nil {
 		fmt.Println("Failed to deserialize incoming packet")
 		os.Exit(-1)

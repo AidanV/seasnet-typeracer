@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
+	"time"
 )
 
 type PlayerInfo struct {
@@ -12,7 +13,14 @@ type PlayerInfo struct {
 	Wpm              uint
 }
 
-func Serialize[P PlayerInfo | []PlayerInfo](p P) ([]byte, error) {
+type Broadcast struct {
+	Done        bool
+	StartTime   time.Time
+	Paragraph   string
+	PlayerInfos []PlayerInfo // ordered by position?
+}
+
+func Serialize[T any](p T) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	err := enc.Encode(p)
@@ -23,24 +31,13 @@ func Serialize[P PlayerInfo | []PlayerInfo](p P) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func DeSerialize(data []byte) (PlayerInfo, error) {
-	var playerInfo PlayerInfo
+func DeSerialize[T any](data []byte) (T, error) {
+	var t T
 	buf := bytes.NewBuffer(data)
 	dec := gob.NewDecoder(buf)
-	err := dec.Decode(&playerInfo)
+	err := dec.Decode(&t)
 	if err != nil {
-		return playerInfo, err
+		return t, err
 	}
-	return playerInfo, nil
-}
-
-func DeSerializeList(data []byte) ([]PlayerInfo, error) {
-	var playerInfo []PlayerInfo
-	buf := bytes.NewBuffer(data)
-	dec := gob.NewDecoder(buf)
-	err := dec.Decode(&playerInfo)
-	if err != nil {
-		return playerInfo, err
-	}
-	return playerInfo, nil
+	return t, nil
 }
