@@ -1,9 +1,11 @@
 package cmd
 
 import (
+	nw "typeracer/cmd/networking"
+
 	"github.com/charmbracelet/bubbles/stopwatch"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/muesli/termenv"
+	// "github.com/muesli/termenv"
 )
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -75,16 +77,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			}
 		}
+	case nw.Broadcast:
+		m.test.wordsToEnter = []rune(msg.Paragraph)
 	}
 
 	// Finished?
-	if len(m.test.wordsToEnter) == len(m.test.inputBuffer) {
-		termenv.DefaultOutput().Reset()
+	// if len(m.test.wordsToEnter) == len(m.test.inputBuffer) {
+	// 	termenv.DefaultOutput().Reset()
 
-		// var results = m.test.calculateResults()
+	// 	// var results = m.test.calculateResults()
 
-		// PersistResults(results)
-	}
+	// 	// PersistResults(results)
+	// }
 
 	// Return the updated model to the Bubble Tea runtime for processing.
 	return m, tea.Batch(commands...)

@@ -39,7 +39,7 @@ func InitialModel(profile termenv.Profile, fore termenv.Color) model {
 			},
 			wpmEachSecond: []float64{},
 			inputBuffer:   []rune{},
-			wordsToEnter:  []rune("this is my test string for testing. a typing test that is very tested and among other things."),
+			wordsToEnter:  []rune(" "),
 			cursor:        0,
 			completed:     false,
 			mistakes: mistakes{
