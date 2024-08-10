@@ -10,25 +10,17 @@ import (
 	"golang.org/x/term"
 )
 
-// func InitialModel() model {
-// 	return model{
-// 		// Our to-do list is a grocery list
-// 		// choices: []string{"Buy carrots", "Buy celery", "Buy kohlrabi"},
-
-// 		// A map which indicates which choices are selected. We're using
-// 		// the  map like a mathematical set. The keys refer to the indexes
-// 		// of the `choices` slice, above.
-// 		// selected: make(map[int]struct{}),
-// 	}
-// }
-
 func (m model) Init() tea.Cmd {
-	// Just return `nil`, which means "no I/O right now, please."
 	return nil
 }
 
-func InitialModel(profile termenv.Profile, fore termenv.Color, port int) model {
+func InitialModel(profile termenv.Profile, fore termenv.Color, name string, port int) model {
 	termWidth, termHeight, _ := term.GetSize(int(os.Stdin.Fd()))
+	playerInfo := nw.PlayerInfo{
+		Name:             name,
+		PercentCompleted: 0,
+		Wpm:              0,
+	}
 	return model{
 		width:  termWidth,
 		height: termHeight,
@@ -75,12 +67,9 @@ func InitialModel(profile termenv.Profile, fore termenv.Color, port int) model {
 		},
 		progresses: []PlayerProg{},
 		conn: nw.InitClient(
-			nw.PlayerInfo{
-				Name:             "testing",
-				PercentCompleted: 0,
-				Wpm:              0,
-			},
+			playerInfo,
 			port,
 		),
+		playerInfo: playerInfo,
 	}
 }

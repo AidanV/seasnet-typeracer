@@ -3,6 +3,7 @@ package cmd
 import (
 	nw "typeracer/cmd/networking"
 
+	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/stopwatch"
 	tea "github.com/charmbracelet/bubbletea"
 	// "github.com/muesli/termenv"
@@ -80,6 +81,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case nw.Broadcast:
 		m.test.wordsToEnter = []rune(msg.Paragraph)
+		m.progresses = []PlayerProg{}
+		for _, pi := range msg.PlayerInfos {
+			m.progresses = append(
+				m.progresses,
+				PlayerProg{
+					prog: progress.New(),
+					name: pi.Name,
+					done: pi.PercentCompleted >= 100,
+				},
+			)
+		}
 	}
 
 	// Finished?
@@ -88,11 +100,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// var results = m.test.calculateResults()
 
-	// nw.PublishPlayerInfo(nw.PlayerInfo{
-	// 	Name:             "aid",
-	// 	PercentCompleted: 0,
-	// 	Wpm:              uint(m.test.results.wpm),
-	// }, m.conn)
+	nw.PublishPlayerInfo(m.playerInfo, m.conn)
 	// }
 
 	// Return the updated model to the Bubble Tea runtime for processing.

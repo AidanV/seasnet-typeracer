@@ -3,6 +3,7 @@ package cmd
 import (
 	"net"
 	"time"
+	nw "typeracer/cmd/networking"
 
 	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/stopwatch"
@@ -29,6 +30,7 @@ type model struct {
 	height     int
 	progresses []PlayerProg
 	conn       net.Conn
+	playerInfo nw.PlayerInfo
 }
 
 type PlayerProg struct {
