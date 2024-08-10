@@ -42,8 +42,8 @@ func (m model) View() string {
 		s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart, ctrl+q to menu", m.styles.toEnter))
 	}
 	s += "\n\n"
-	for i, prog := range m.progresses {
-		s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.prog.ViewAs(float64(i)/10.0)) + "\n"
+	for _, prog := range m.progresses {
+		s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.name) + "\n" + lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.prog.ViewAs(float64(prog.percentCompleted)/100.0)) + "\n"
 	}
 	return s
 }

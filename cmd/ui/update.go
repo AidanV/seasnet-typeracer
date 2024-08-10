@@ -86,9 +86,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.progresses = append(
 				m.progresses,
 				PlayerProg{
-					prog: progress.New(),
-					name: pi.Name,
-					done: pi.PercentCompleted >= 100,
+					prog:             progress.New(),
+					name:             pi.Name,
+					percentCompleted: pi.PercentCompleted,
 				},
 			)
 		}
@@ -99,6 +99,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// termenv.DefaultOutput().Reset()
 
 	// var results = m.test.calculateResults()
+	m.playerInfo.PercentCompleted = uint(100.0 * len(m.test.inputBuffer) / len(m.test.wordsToEnter))
 
 	nw.PublishPlayerInfo(m.playerInfo, m.conn)
 	// }

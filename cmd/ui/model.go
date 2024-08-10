@@ -34,9 +34,9 @@ type model struct {
 }
 
 type PlayerProg struct {
-	prog progress.Model
-	name string
-	done bool
+	prog             progress.Model
+	name             string
+	percentCompleted uint
 }
 
 type Test struct {
