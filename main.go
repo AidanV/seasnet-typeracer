@@ -12,19 +12,17 @@ import (
 	"github.com/muesli/termenv"
 )
 
+var Prog *tea.Program
+
 func main() {
 	serverPtr := flag.Bool("server", false, "a bool")
 	flag.Parse()
-	p := tea.NewProgram(ui.InitialModel(termenv.ANSI256, termenv.ANSIWhite), tea.WithAltScreen())
 	if *serverPtr {
-		go func() {
-			nw.InitServer(8000)
-		}()
+		go nw.InitServer(8000)
 	}
-	go func() {
-		nw.InitClient(8000, p)
-	}()
-	if _, err := p.Run(); err != nil {
+	Prog = tea.NewProgram(ui.InitialModel(termenv.ANSI256, termenv.ANSIWhite, 8000), tea.WithAltScreen())
+	nw.Prog = Prog
+	if _, err := Prog.Run(); err != nil {
 		fmt.Printf("Alas, there's been an error: %v", err)
 		os.Exit(1)
 	}

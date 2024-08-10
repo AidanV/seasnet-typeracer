@@ -9,40 +9,34 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func InitClient(port int, p *tea.Program) {
+var Prog *tea.Program
+
+func InitClient(playerInfo PlayerInfo, port int) net.Conn {
 	conn, err := net.Dial("udp", fmt.Sprintf("127.0.0.1:%v", port))
 	if err != nil {
 		fmt.Printf("Dial err %v", err)
 		os.Exit(-1)
 	}
-	go client(conn)
-	go readPlayerInfosOnInterval(500*time.Millisecond, conn, p)
+	go readPlayerInfosOnInterval(500*time.Millisecond, conn)
+	go PublishPlayerInfo(
+		playerInfo,
+		conn,
+	)
+	return conn
 }
-
-func client(conn net.Conn) {
-	defer conn.Close()
-	for {
-		msg, err := Serialize(getPlayerInfo())
-		if err != nil {
-			fmt.Println("Failed to serialize")
-			os.Exit(-1)
-		}
-		if _, err = conn.Write(msg); err != nil {
-			fmt.Printf("Write err %v", err)
-			os.Exit(-1)
-		}
+func PublishPlayerInfo(playerInfo PlayerInfo, conn net.Conn) {
+	msg, err := Serialize(playerInfo)
+	if err != nil {
+		fmt.Println("Failed to serialize")
+		os.Exit(-1)
+	}
+	if _, err = conn.Write(msg); err != nil {
+		fmt.Printf("Write err %v\n", err)
+		os.Exit(-2)
 	}
 }
 
-func getPlayerInfo() PlayerInfo {
-	return PlayerInfo{
-		Name:             "aidan",
-		PercentCompleted: 88,
-		Wpm:              13,
-	}
-}
-
-func readPlayerInfosOnInterval(tick time.Duration, conn net.Conn, prog *tea.Program) {
+func readPlayerInfosOnInterval(tick time.Duration, conn net.Conn) {
 	for range time.Tick(tick) {
 		p := make([]byte, 1024)
 		nn, err := conn.Read(p)
@@ -55,6 +49,10 @@ func readPlayerInfosOnInterval(tick time.Duration, conn net.Conn, prog *tea.Prog
 			fmt.Println("Failed to deserialize player infos response")
 			os.Exit(-1)
 		}
-		prog.Send(bcast)
+		if Prog == nil {
+			fmt.Println("Program was nil")
+			os.Exit(15)
+		}
+		Prog.Send(bcast)
 	}
 }

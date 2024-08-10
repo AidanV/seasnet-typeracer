@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"net"
 	"time"
 
 	"github.com/charmbracelet/bubbles/progress"
@@ -27,6 +28,7 @@ type model struct {
 	width      int
 	height     int
 	progresses []PlayerProg
+	conn       net.Conn
 }
 
 type PlayerProg struct {

@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"os"
+	nw "typeracer/cmd/networking"
 
-	"github.com/charmbracelet/bubbles/progress"
 	"github.com/charmbracelet/bubbles/stopwatch"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
@@ -27,7 +27,7 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func InitialModel(profile termenv.Profile, fore termenv.Color) model {
+func InitialModel(profile termenv.Profile, fore termenv.Color, port int) model {
 	termWidth, termHeight, _ := term.GetSize(int(os.Stdin.Fd()))
 	return model{
 		width:  termWidth,
@@ -73,22 +73,14 @@ func InitialModel(profile termenv.Profile, fore termenv.Color) model {
 				return termenv.String(str).Foreground(profile.Color("10")).Faint()
 			},
 		},
-		progresses: []PlayerProg{
-			{
-				prog: progress.New(),
-				name: "me",
-				done: false,
+		progresses: []PlayerProg{},
+		conn: nw.InitClient(
+			nw.PlayerInfo{
+				Name:             "testing",
+				PercentCompleted: 0,
+				Wpm:              0,
 			},
-			{
-				prog: progress.New(),
-				name: "aidan",
-				done: false,
-			},
-			{
-				prog: progress.New(),
-				name: "you",
-				done: false,
-			},
-		},
+			port,
+		),
 	}
 }

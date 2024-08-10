@@ -31,6 +31,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// These keys should exit the program.
 		case "ctrl+c", "esc":
+			defer m.conn.Close()
 			return m, tea.Quit
 		}
 	}
@@ -83,11 +84,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Finished?
 	// if len(m.test.wordsToEnter) == len(m.test.inputBuffer) {
-	// 	termenv.DefaultOutput().Reset()
+	// termenv.DefaultOutput().Reset()
 
-	// 	// var results = m.test.calculateResults()
+	// var results = m.test.calculateResults()
 
-	// 	// PersistResults(results)
+	// nw.PublishPlayerInfo(nw.PlayerInfo{
+	// 	Name:             "aid",
+	// 	PercentCompleted: 0,
+	// 	Wpm:              uint(m.test.results.wpm),
+	// }, m.conn)
 	// }
 
 	// Return the updated model to the Bubble Tea runtime for processing.
