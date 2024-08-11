@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type serverState struct {
+type server struct {
 	ready     bool
 	startTime time.Time
 }
@@ -24,15 +24,15 @@ func InitServer(port int) {
 		fmt.Printf("Listen err %v\n", err)
 		os.Exit(-1)
 	}
-	state := serverState{
+	s := server{
 		ready:     false,
 		startTime: time.Now(),
 	}
-	go server(playerInfos, conn, &state)
-	go sendPlayerInfosOnInterval(500*time.Millisecond, playerInfos, conn, &state)
+	go s.server(playerInfos, conn)
+	go s.sendPlayerInfosOnInterval(500*time.Millisecond, playerInfos, conn)
 }
 
-func server(playerInfos *sync.Map, conn *net.UDPConn, state *serverState) {
+func (s *server) server(playerInfos *sync.Map, conn *net.UDPConn) {
 	defer conn.Close()
 	for {
 		p := make([]byte, 1024)
@@ -41,11 +41,11 @@ func server(playerInfos *sync.Map, conn *net.UDPConn, state *serverState) {
 			fmt.Printf("Read err  %v", err)
 			continue
 		}
-		go handlePacket(playerInfos, p, nn, addr, state)
+		go s.handlePacket(playerInfos, p, nn, addr)
 	}
 }
 
-func handlePacket(playerInfos *sync.Map, p []byte, nn int, addr *net.UDPAddr, state *serverState) {
+func (s *server) handlePacket(playerInfos *sync.Map, p []byte, nn int, addr *net.UDPAddr) {
 	msg := p[:nn]
 	playerInfo, err := DeSerialize[PlayerInfo](msg)
 	if err != nil {
@@ -61,13 +61,13 @@ func handlePacket(playerInfos *sync.Map, p []byte, nn int, addr *net.UDPAddr, st
 		}
 		return true
 	})
-	if !state.ready && readyToStart {
-		state.ready = true
-		state.startTime = time.Now()
+	if !s.ready && readyToStart {
+		s.ready = true
+		s.startTime = time.Now()
 	}
 }
 
-func sendPlayerInfosOnInterval(tick time.Duration, playerInfos *sync.Map, conn *net.UDPConn, state *serverState) {
+func (s *server) sendPlayerInfosOnInterval(tick time.Duration, playerInfos *sync.Map, conn *net.UDPConn) {
 	for range time.Tick(tick) {
 		addrs := []*net.UDPAddr{}
 		pis := []PlayerInfo{}
@@ -82,8 +82,8 @@ func sendPlayerInfosOnInterval(tick time.Duration, playerInfos *sync.Map, conn *
 		})
 		bcast := Broadcast{
 			Done:        false,
-			Started:     state.ready,
-			StartTime:   state.startTime,
+			Started:     s.ready,
+			StartTime:   s.startTime,
 			Paragraph:   "A Lion lay asleep in the forest, his great head resting on his paws. A timid little Mouse came upon him unexpectedly, and in her fright and haste to get away, ran across the Lion's nose. Roused from his nap, the Lion laid his huge paw angrily on the tiny creature to kill her. \"Spare me!\"",
 			PlayerInfos: pis,
 		}
