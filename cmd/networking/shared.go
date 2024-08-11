@@ -16,6 +16,7 @@ type PlayerInfo struct {
 
 type Broadcast struct {
 	Done        bool
+	Started     bool
 	StartTime   time.Time
 	Paragraph   string
 	PlayerInfos []PlayerInfo // ordered by position?

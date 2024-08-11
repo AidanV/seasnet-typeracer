@@ -40,7 +40,7 @@ type PlayerProg struct {
 }
 
 type Test struct {
-	stopwatch     TestStopwatch
+	startTime     time.Time
 	wpmEachSecond []float64
 	inputBuffer   []rune
 	wordsToEnter  []rune

@@ -4,7 +4,6 @@ import (
 	"os"
 	nw "typeracer/cmd/networking"
 
-	"github.com/charmbracelet/bubbles/stopwatch"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
 	"golang.org/x/term"
@@ -26,10 +25,6 @@ func InitialModel(profile termenv.Profile, fore termenv.Color, name string, port
 		width:  termWidth,
 		height: termHeight,
 		test: Test{
-			stopwatch: TestStopwatch{
-				stopwatch: stopwatch.New(),
-				isRunning: false,
-			},
 			wpmEachSecond: []float64{},
 			inputBuffer:   []rune{},
 			wordsToEnter:  []rune(" "),

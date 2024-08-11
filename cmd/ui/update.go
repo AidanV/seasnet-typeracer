@@ -4,7 +4,6 @@ import (
 	nw "typeracer/cmd/networking"
 
 	"github.com/charmbracelet/bubbles/progress"
-	"github.com/charmbracelet/bubbles/stopwatch"
 	tea "github.com/charmbracelet/bubbletea"
 	// "github.com/muesli/termenv"
 )
@@ -38,30 +37,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "esc":
 			defer m.conn.Close()
 			return m, tea.Quit
-		}
-	}
-
-	switch msg := msg.(type) {
-
-	case stopwatch.StartStopMsg:
-		stopwatchUpdate, cmdUpdate := m.test.stopwatch.stopwatch.Update(msg)
-		m.test.stopwatch.stopwatch = stopwatchUpdate
-		commands = append(commands, cmdUpdate)
-
-	case stopwatch.TickMsg:
-		stopwatchUpdate, cmdUpdate := m.test.stopwatch.stopwatch.Update(msg)
-		m.test.stopwatch.stopwatch = stopwatchUpdate
-		commands = append(commands, cmdUpdate)
-
-		elapsedMinutes := m.test.stopwatch.stopwatch.Elapsed().Minutes()
-
-		if elapsedMinutes != 0 {
-			m.test.wpmEachSecond = append(m.test.wpmEachSecond, m.test.calculateNormalizedWpm(elapsedMinutes))
-		}
-
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter", "tab":
+		case "tab":
 
 		case "backspace", "ctrl+h":
 			handleBackspace(&m.test)
@@ -75,17 +51,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		default:
 			switch msg.Type {
 			case tea.KeyRunes:
-				if !m.test.stopwatch.isRunning {
-					commands = append(commands, m.test.stopwatch.stopwatch.Init())
-					m.test.stopwatch.isRunning = true
-				}
 				handleRunes(msg, &m.test)
-
 			}
 		}
+
 	case nw.Broadcast:
 		m.test.wordsToEnter = []rune(msg.Paragraph)
 		m.progresses = []PlayerProg{}
+		m.test.startTime = msg.StartTime
 		for _, pi := range msg.PlayerInfos {
 			m.progresses = append(
 				m.progresses,
