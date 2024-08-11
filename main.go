@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"math/rand"
 
 	"os"
 	nw "typeracer/cmd/networking"
@@ -15,10 +16,10 @@ import (
 var Prog *tea.Program
 
 func main() {
-	serverPtr := flag.Bool("server", false, "should run the server")
+	serverPtr := flag.Bool("server", false, "run the server")
 	numPtr := flag.Int("port", 8000, "port number")
 	var name string
-	flag.StringVar(&name, "name", "bar", "your name")
+	flag.StringVar(&name, "name", "guest"+fmt.Sprint(rand.Intn(5000)), "your name")
 	flag.Parse()
 	if *serverPtr {
 		go nw.InitServer(*numPtr)
