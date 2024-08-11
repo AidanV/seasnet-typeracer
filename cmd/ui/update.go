@@ -71,7 +71,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	m.playerInfo.PercentCompleted = uint(100.0 * len(m.test.inputBuffer) / len(m.test.wordsToEnter))
+	m.playerInfo.PercentCompleted = uint(100.0 * float64(m.test.calculateNumCorrect()) / float64(len(m.test.wordsToEnter)))
+	m.playerInfo.Wpm = uint(m.test.calculateNormalizedWpm())
 
 	nw.PublishPlayerInfo(m.playerInfo, m.conn)
 
