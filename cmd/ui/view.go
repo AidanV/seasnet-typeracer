@@ -15,35 +15,39 @@ func (m model) View() string {
 	var s string
 
 	var termWidth, termHeight = m.width, m.height
+	if m.playerInfo.ReadyToStart {
 
-	lineLenLimit := termWidth * 3 / 4
+		lineLenLimit := termWidth * 3 / 4
 
-	var coloredStopwatch string
-	if m.test.stopwatch.isRunning {
-		coloredStopwatch = style(m.test.stopwatch.stopwatch.View(), m.styles.runningTimer)
+		var coloredStopwatch string
+		if m.test.stopwatch.isRunning {
+			coloredStopwatch = style(m.test.stopwatch.stopwatch.View(), m.styles.runningTimer)
+		} else {
+			coloredStopwatch = style(m.test.stopwatch.stopwatch.View(), m.styles.stoppedTimer)
+		}
+
+		paragraphView := m.test.paragraphView(lineLenLimit, m.styles)
+		lines := strings.Split(paragraphView, "\n")
+		cursorLine := findCursorLine(strings.Split(paragraphView, "\n"), m.test.cursor)
+
+		linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
+
+		s += positionVerticaly(termHeight)
+		avgLineLen := averageLineLen(lines)
+		indentBy := uint(math.Max(0, float64(termWidth/2-avgLineLen/2)))
+
+		s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
+
+		if !m.test.stopwatch.isRunning {
+			s += "\n\n\n"
+			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart, ctrl+q to menu", m.styles.toEnter))
+		}
+		s += "\n\n"
+		for _, prog := range m.progresses {
+			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.name) + "\n" + lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.prog.ViewAs(float64(prog.percentCompleted)/100.0)) + "\n"
+		}
 	} else {
-		coloredStopwatch = style(m.test.stopwatch.stopwatch.View(), m.styles.stoppedTimer)
-	}
-
-	paragraphView := m.test.paragraphView(lineLenLimit, m.styles)
-	lines := strings.Split(paragraphView, "\n")
-	cursorLine := findCursorLine(strings.Split(paragraphView, "\n"), m.test.cursor)
-
-	linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
-
-	s += positionVerticaly(termHeight)
-	avgLineLen := averageLineLen(lines)
-	indentBy := uint(math.Max(0, float64(termWidth/2-avgLineLen/2)))
-
-	s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
-
-	if !m.test.stopwatch.isRunning {
-		s += "\n\n\n"
-		s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart, ctrl+q to menu", m.styles.toEnter))
-	}
-	s += "\n\n"
-	for _, prog := range m.progresses {
-		s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.name) + "\n" + lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.prog.ViewAs(float64(prog.percentCompleted)/100.0)) + "\n"
+		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Press Enter to ready up")
 	}
 	return s
 }

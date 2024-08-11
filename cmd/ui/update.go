@@ -29,6 +29,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Cool, what was the actual key pressed?
 		switch msg.String() {
+		case "enter":
+			if !m.playerInfo.ReadyToStart {
+				m.playerInfo.ReadyToStart = true
+			}
 
 		// These keys should exit the program.
 		case "ctrl+c", "esc":
@@ -94,17 +98,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	// Finished?
-	// if len(m.test.wordsToEnter) == len(m.test.inputBuffer) {
-	// termenv.DefaultOutput().Reset()
-
-	// var results = m.test.calculateResults()
 	m.playerInfo.PercentCompleted = uint(100.0 * len(m.test.inputBuffer) / len(m.test.wordsToEnter))
 
 	nw.PublishPlayerInfo(m.playerInfo, m.conn)
-	// }
 
-	// Return the updated model to the Bubble Tea runtime for processing.
 	return m, tea.Batch(commands...)
 }
 

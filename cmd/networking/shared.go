@@ -11,6 +11,7 @@ type PlayerInfo struct {
 	Name             string
 	PercentCompleted uint
 	Wpm              uint
+	ReadyToStart     bool
 }
 
 type Broadcast struct {
