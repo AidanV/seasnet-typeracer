@@ -16,7 +16,7 @@ func (m model) View() string {
 	var s string
 
 	var termWidth, termHeight = m.width, m.height
-	if m.playerInfo.ReadyToStart {
+	if m.test.started {
 
 		lineLenLimit := termWidth * 3 / 4
 
@@ -40,6 +40,8 @@ func (m model) View() string {
 		for _, prog := range m.progresses {
 			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.name) + "\n" + lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.prog.ViewAs(float64(prog.percentCompleted)/100.0)) + "\n"
 		}
+	} else if m.playerInfo.ReadyToStart {
+		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Waiting for others...")
 	} else {
 		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Press Enter to ready up")
 	}

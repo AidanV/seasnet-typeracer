@@ -58,6 +58,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case nw.Broadcast:
 		m.test.wordsToEnter = []rune(msg.Paragraph)
 		m.progresses = []PlayerProg{}
+		m.test.started = msg.Started
 		m.test.startTime = msg.StartTime
 		for _, pi := range msg.PlayerInfos {
 			m.progresses = append(

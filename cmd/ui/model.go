@@ -40,6 +40,7 @@ type PlayerProg struct {
 }
 
 type Test struct {
+	started       bool
 	startTime     time.Time
 	wpmEachSecond []float64
 	inputBuffer   []rune
