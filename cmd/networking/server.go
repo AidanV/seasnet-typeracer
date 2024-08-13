@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"sort"
 	"sync"
 	"time"
 )
@@ -69,17 +70,31 @@ func (s *server) handlePacket(playerInfos *sync.Map, p []byte, nn int, addr *net
 
 func (s *server) sendPlayerInfosOnInterval(tick time.Duration, playerInfos *sync.Map, conn *net.UDPConn) {
 	for range time.Tick(tick) {
-		addrs := []*net.UDPAddr{}
-		pis := []PlayerInfo{}
+		type player struct {
+			addr *net.UDPAddr
+			pi   PlayerInfo
+		}
+		players := []player{}
 		playerInfos.Range(func(a any, pi any) bool {
 			addr, err := net.ResolveUDPAddr("udp", a.(string))
 			if err != nil {
 				fmt.Println("Failed to resolve udp address")
 			}
-			addrs = append(addrs, addr)
-			pis = append(pis, pi.(PlayerInfo))
+			players = append(players, player{
+				addr: addr,
+				pi:   pi.(PlayerInfo),
+			})
 			return true
 		})
+		sort.Slice(players, func(i, j int) bool {
+			return players[i].pi.PercentCompleted > players[j].pi.PercentCompleted
+		})
+		pis := []PlayerInfo{}
+		addrs := []*net.UDPAddr{}
+		for _, p := range players {
+			pis = append(pis, p.pi)
+			addrs = append(addrs, p.addr)
+		}
 		bcast := Broadcast{
 			Done:        false,
 			Started:     s.ready,
