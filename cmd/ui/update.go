@@ -46,12 +46,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			handleCtrlW(&m.test)
 
 		case " ":
-			handleSpace(&m.test)
+			if !m.test.completed {
+				handleSpace(&m.test)
+			}
 
 		default:
 			switch msg.Type {
 			case tea.KeyRunes:
-				handleRunes(msg, &m.test)
+				if !m.test.completed {
+					handleRunes(msg, &m.test)
+				}
 			}
 		}
 
