@@ -183,6 +183,10 @@ func (test *Test) colorCursor(styles Styles) string {
 }
 
 func (test *Test) colorWordsToEnter(styles Styles) string {
+	if len(test.inputBuffer) >= len(test.wordsToEnter) {
+		return ""
+	}
+
 	wordsToEnter := test.wordsToEnter[len(test.inputBuffer)+1:] // without cursor
 
 	return style(string(wordsToEnter), styles.toEnter)

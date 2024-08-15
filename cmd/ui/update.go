@@ -41,14 +41,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.test.handleCtrlW()
 
 		case " ":
-			if !m.test.completed {
+			if len(m.test.inputBuffer) < len(m.test.wordsToEnter) {
 				m.test.handleSpace()
 			}
 
 		default:
 			switch msg.Type {
 			case tea.KeyRunes:
-				if !m.test.completed {
+				if len(m.test.inputBuffer) < len(m.test.wordsToEnter) {
 					m.test.handleRunes(msg)
 				}
 			}
