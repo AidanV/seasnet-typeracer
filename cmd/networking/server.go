@@ -13,6 +13,7 @@ type server struct {
 	ready       bool
 	startTime   time.Time
 	playerInfos *sync.Map
+	conn        *net.UDPConn
 }
 
 func InitServer(port int) {
@@ -29,16 +30,17 @@ func InitServer(port int) {
 		ready:       false,
 		startTime:   time.Now(),
 		playerInfos: new(sync.Map),
+		conn:        conn,
 	}
-	go s.server(conn)
-	go s.sendPlayerInfosOnInterval(500*time.Millisecond, conn)
+	go s.server()
+	go s.sendPlayerInfosOnInterval(500 * time.Millisecond)
 }
 
-func (s *server) server(conn *net.UDPConn) {
-	defer conn.Close()
+func (s *server) server() {
+	defer s.conn.Close()
 	for {
 		p := make([]byte, 1024)
-		nn, addr, err := conn.ReadFromUDP(p)
+		nn, addr, err := s.conn.ReadFromUDP(p)
 		if err != nil {
 			fmt.Printf("Read err  %v", err)
 			continue
@@ -69,7 +71,7 @@ func (s *server) handlePacket(p []byte, nn int, addr *net.UDPAddr) {
 	}
 }
 
-func (s *server) sendPlayerInfosOnInterval(tick time.Duration, conn *net.UDPConn) {
+func (s *server) sendPlayerInfosOnInterval(tick time.Duration) {
 	for range time.Tick(tick) {
 		pis, addrs := s.getOrderedPlayerInfosAndAddresses()
 		bcast := Broadcast{
@@ -85,7 +87,7 @@ func (s *server) sendPlayerInfosOnInterval(tick time.Duration, conn *net.UDPConn
 			os.Exit(-1)
 		}
 		for _, a := range addrs {
-			_, err = conn.WriteToUDP(msg, a)
+			_, err = s.conn.WriteToUDP(msg, a)
 			if err != nil {
 				fmt.Println("Failed to send response")
 				os.Exit(-1)
