@@ -45,9 +45,9 @@ type Test struct {
 	wpmEachSecond []float64
 	inputBuffer   []rune
 	wordsToEnter  []rune
-	results       Results
+	results       nw.Results
 	cursor        int
-	completed     bool
+	completed     bool // local test completition
 	mistakes      mistakes
 	rawInputCnt   int
 }
@@ -60,10 +60,4 @@ type mistakes struct {
 type TestStopwatch struct {
 	stopwatch stopwatch.Model
 	isRunning bool
-}
-
-type Results struct {
-	wpm      int
-	accuracy float64
-	time     time.Duration
 }

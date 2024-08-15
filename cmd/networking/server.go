@@ -75,10 +75,10 @@ func (s *server) sendPlayerInfosOnInterval(tick time.Duration) {
 	for range time.Tick(tick) {
 		pis, addrs := s.getOrderedPlayerInfosAndAddresses()
 		bcast := Broadcast{
-			Done:        false,
+			Results:     s.getResults(),
 			Started:     s.ready,
 			StartTime:   s.startTime,
-			Paragraph:   "Testing string", //"A Lion lay asleep in the forest, his great head resting on his paws. A timid little Mouse came upon him unexpectedly, and in her fright and haste to get away, ran across the Lion's nose. Roused from his nap, the Lion laid his huge paw angrily on the tiny creature to kill her. \"Spare me!\"",
+			Paragraph:   "Testing string",
 			PlayerInfos: pis,
 		}
 		msg, err := Serialize(bcast)
@@ -94,6 +94,24 @@ func (s *server) sendPlayerInfosOnInterval(tick time.Duration) {
 			}
 		}
 	}
+}
+
+func (s *server) getResults() Results {
+	results := Results{
+		Done:   false,
+		Winner: "",
+	}
+	s.playerInfos.Range(func(_ any, pi any) bool {
+		if pi.(PlayerInfo).PercentCompleted == 100 {
+			results = Results{
+				Done:   true,
+				Winner: pi.(PlayerInfo).Name,
+			}
+			return false
+		}
+		return true
+	})
+	return results
 }
 
 func (s *server) getOrderedPlayerInfosAndAddresses() ([]PlayerInfo, []*net.UDPAddr) {

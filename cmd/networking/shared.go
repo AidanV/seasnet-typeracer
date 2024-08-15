@@ -15,11 +15,16 @@ type PlayerInfo struct {
 }
 
 type Broadcast struct {
-	Done        bool
+	Results     Results
 	Started     bool
 	StartTime   time.Time
 	Paragraph   string
 	PlayerInfos []PlayerInfo // ordered by position
+}
+
+type Results struct {
+	Done   bool
+	Winner string
 }
 
 func Serialize[T any](p T) ([]byte, error) {

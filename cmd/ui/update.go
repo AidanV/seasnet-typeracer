@@ -59,6 +59,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.progresses = []PlayerProg{}
 		m.test.started = msg.Started
 		m.test.startTime = msg.StartTime
+		if msg.Results.Done {
+			m.test.results.Done = true
+			m.test.results.Winner = msg.Results.Winner
+		}
 		for _, pi := range msg.PlayerInfos {
 			m.progresses = append(
 				m.progresses,

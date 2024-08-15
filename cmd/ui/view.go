@@ -16,7 +16,9 @@ func (m model) View() string {
 	var s string
 
 	var termWidth, termHeight = m.width, m.height
-	if m.test.completed {
+	if m.test.results.Done {
+		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "The winner is "+m.test.results.Winner)
+	} else if m.test.completed {
 		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Done")
 	} else if m.test.started {
 
