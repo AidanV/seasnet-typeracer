@@ -5,7 +5,6 @@ import (
 
 	"github.com/charmbracelet/bubbles/progress"
 	tea "github.com/charmbracelet/bubbletea"
-	// "github.com/muesli/termenv"
 )
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

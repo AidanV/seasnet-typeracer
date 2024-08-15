@@ -19,7 +19,7 @@ type Broadcast struct {
 	Started     bool
 	StartTime   time.Time
 	Paragraph   string
-	PlayerInfos []PlayerInfo // ordered by position?
+	PlayerInfos []PlayerInfo // ordered by position
 }
 
 func Serialize[T any](p T) ([]byte, error) {

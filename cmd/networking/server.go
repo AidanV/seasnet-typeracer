@@ -10,12 +10,12 @@ import (
 )
 
 type server struct {
-	ready     bool
-	startTime time.Time
+	ready       bool
+	startTime   time.Time
+	playerInfos *sync.Map
 }
 
 func InitServer(port int) {
-	playerInfos := new(sync.Map)
 	addr := net.UDPAddr{
 		IP:   net.ParseIP("0.0.0.0"),
 		Port: port,
@@ -26,14 +26,15 @@ func InitServer(port int) {
 		os.Exit(-1)
 	}
 	s := server{
-		ready:     false,
-		startTime: time.Now(),
+		ready:       false,
+		startTime:   time.Now(),
+		playerInfos: new(sync.Map),
 	}
-	go s.server(playerInfos, conn)
-	go s.sendPlayerInfosOnInterval(500*time.Millisecond, playerInfos, conn)
+	go s.server(conn)
+	go s.sendPlayerInfosOnInterval(500*time.Millisecond, conn)
 }
 
-func (s *server) server(playerInfos *sync.Map, conn *net.UDPConn) {
+func (s *server) server(conn *net.UDPConn) {
 	defer conn.Close()
 	for {
 		p := make([]byte, 1024)
@@ -42,20 +43,20 @@ func (s *server) server(playerInfos *sync.Map, conn *net.UDPConn) {
 			fmt.Printf("Read err  %v", err)
 			continue
 		}
-		go s.handlePacket(playerInfos, p, nn, addr)
+		go s.handlePacket(p, nn, addr)
 	}
 }
 
-func (s *server) handlePacket(playerInfos *sync.Map, p []byte, nn int, addr *net.UDPAddr) {
+func (s *server) handlePacket(p []byte, nn int, addr *net.UDPAddr) {
 	msg := p[:nn]
 	playerInfo, err := DeSerialize[PlayerInfo](msg)
 	if err != nil {
 		fmt.Println("Failed to deserialize incoming packet")
 		os.Exit(-1)
 	}
-	playerInfos.Store(addr.String(), playerInfo)
+	s.playerInfos.Store(addr.String(), playerInfo)
 	readyToStart := true
-	playerInfos.Range(func(key any, val any) bool {
+	s.playerInfos.Range(func(key any, val any) bool {
 		pi := val.(PlayerInfo)
 		if !pi.ReadyToStart {
 			readyToStart = false
@@ -68,33 +69,9 @@ func (s *server) handlePacket(playerInfos *sync.Map, p []byte, nn int, addr *net
 	}
 }
 
-func (s *server) sendPlayerInfosOnInterval(tick time.Duration, playerInfos *sync.Map, conn *net.UDPConn) {
+func (s *server) sendPlayerInfosOnInterval(tick time.Duration, conn *net.UDPConn) {
 	for range time.Tick(tick) {
-		type player struct {
-			addr *net.UDPAddr
-			pi   PlayerInfo
-		}
-		players := []player{}
-		playerInfos.Range(func(a any, pi any) bool {
-			addr, err := net.ResolveUDPAddr("udp", a.(string))
-			if err != nil {
-				fmt.Println("Failed to resolve udp address")
-			}
-			players = append(players, player{
-				addr: addr,
-				pi:   pi.(PlayerInfo),
-			})
-			return true
-		})
-		sort.Slice(players, func(i, j int) bool {
-			return players[i].pi.PercentCompleted > players[j].pi.PercentCompleted
-		})
-		pis := []PlayerInfo{}
-		addrs := []*net.UDPAddr{}
-		for _, p := range players {
-			pis = append(pis, p.pi)
-			addrs = append(addrs, p.addr)
-		}
+		pis, addrs := s.getOrderedPlayerInfosAndAddresses()
 		bcast := Broadcast{
 			Done:        false,
 			Started:     s.ready,
@@ -115,4 +92,33 @@ func (s *server) sendPlayerInfosOnInterval(tick time.Duration, playerInfos *sync
 			}
 		}
 	}
+}
+
+func (s *server) getOrderedPlayerInfosAndAddresses() ([]PlayerInfo, []*net.UDPAddr) {
+	type player struct {
+		addr *net.UDPAddr
+		pi   PlayerInfo
+	}
+	players := []player{}
+	s.playerInfos.Range(func(a any, pi any) bool {
+		addr, err := net.ResolveUDPAddr("udp", a.(string))
+		if err != nil {
+			fmt.Println("Failed to resolve udp address")
+		}
+		players = append(players, player{
+			addr: addr,
+			pi:   pi.(PlayerInfo),
+		})
+		return true
+	})
+	sort.Slice(players, func(i, j int) bool {
+		return players[i].pi.PercentCompleted > players[j].pi.PercentCompleted
+	})
+	pis := []PlayerInfo{}
+	addrs := []*net.UDPAddr{}
+	for _, p := range players {
+		pis = append(pis, p.pi)
+		addrs = append(addrs, p.addr)
+	}
+	return pis, addrs
 }
