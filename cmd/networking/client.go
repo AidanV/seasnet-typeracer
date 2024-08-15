@@ -41,8 +41,9 @@ func readPlayerInfosOnInterval(tick time.Duration, conn net.Conn) {
 		p := make([]byte, 1024)
 		nn, err := conn.Read(p)
 		if err != nil {
-			fmt.Printf("Read err %v\n", err)
-			os.Exit(-1)
+			conn.Close()
+			Prog.Kill()
+			return
 		}
 		bcast, err := DeSerialize[Broadcast](p[:nn])
 		if err != nil {
