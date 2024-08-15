@@ -23,38 +23,34 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-	// Is it a key press?
 	case tea.KeyMsg:
 
-		// Cool, what was the actual key pressed?
 		switch msg.String() {
 		case "enter":
 			if !m.playerInfo.ReadyToStart {
 				m.playerInfo.ReadyToStart = true
 			}
 
-		// These keys should exit the program.
 		case "ctrl+c", "esc":
 			defer m.conn.Close()
 			return m, tea.Quit
-		case "tab":
 
 		case "backspace", "ctrl+h":
-			handleBackspace(&m.test)
+			m.test.handleBackspace()
 
 		case "ctrl+w":
-			handleCtrlW(&m.test)
+			m.test.handleCtrlW()
 
 		case " ":
 			if !m.test.completed {
-				handleSpace(&m.test)
+				m.test.handleSpace()
 			}
 
 		default:
 			switch msg.Type {
 			case tea.KeyRunes:
 				if !m.test.completed {
-					handleRunes(msg, &m.test)
+					m.test.handleRunes(msg)
 				}
 			}
 		}
@@ -97,7 +93,7 @@ func (m model) quitOn(msg tea.Msg, strokes ...string) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func handleBackspace(test *Test) {
+func (test *Test) handleBackspace() {
 	test.inputBuffer = dropLastRune(test.inputBuffer)
 
 	//Delete mistakes
@@ -110,7 +106,7 @@ func handleBackspace(test *Test) {
 	test.cursor = inputLength
 }
 
-func handleCtrlW(test *Test) {
+func (test *Test) handleCtrlW() {
 	test.inputBuffer = dropUntilWsIdx(test.inputBuffer, test.findLatestWsIndex())
 	bufferLen := len(test.inputBuffer)
 	test.cursor = bufferLen
@@ -133,7 +129,7 @@ func dropUntilWsIdx(input []rune, wsIdx int) []rune {
 	}
 }
 
-func handleRunes(msg tea.KeyMsg, test *Test) {
+func (test *Test) handleRunes(msg tea.KeyMsg) {
 	inputLetter := msg.Runes[len(msg.Runes)-1]
 
 	inputLenDec := len(test.inputBuffer)
@@ -153,7 +149,7 @@ func handleRunes(msg tea.KeyMsg, test *Test) {
 	test.cursor = lenAfterAppend
 }
 
-func handleSpace(test *Test) {
+func (test *Test) handleSpace() {
 	if len(test.inputBuffer) > 0 {
 		test.inputBuffer = append(test.inputBuffer, ' ')
 		test.cursor = len(test.inputBuffer)
