@@ -60,6 +60,11 @@ func (s *server) handlePacket(p []byte, nn int, addr *net.UDPAddr) {
 		os.Exit(-1)
 	}
 	s.playerInfos.Store(addr.String(), playerInfo)
+	s.handleStartRequest()
+	s.handleDisconnectRequest(playerInfo, addr.String())
+}
+
+func (s *server) handleStartRequest() {
 	readyToStart := true
 	s.playerInfos.Range(func(key any, val any) bool {
 		pi := val.(PlayerInfo)
@@ -72,6 +77,12 @@ func (s *server) handlePacket(p []byte, nn int, addr *net.UDPAddr) {
 		s.ready = true
 		s.startTime = time.Now()
 		s.paragraph = getRandomParagraph()
+	}
+}
+
+func (s *server) handleDisconnectRequest(p PlayerInfo, addr string) {
+	if p.Disconnecting {
+		s.playerInfos.Delete(addr)
 	}
 }
 

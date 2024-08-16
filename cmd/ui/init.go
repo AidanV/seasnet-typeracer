@@ -20,6 +20,7 @@ func InitialModel(profile termenv.Profile, fore termenv.Color, name string, port
 		PercentCompleted: 0,
 		Wpm:              0,
 		ReadyToStart:     false,
+		Disconnecting:    false,
 	}
 	return model{
 		width:  termWidth,

@@ -32,6 +32,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "ctrl+c", "esc":
 			defer m.conn.Close()
+			m.playerInfo.Disconnecting = true
+			nw.PublishPlayerInfo(m.playerInfo, m.conn)
 			return m, tea.Quit
 
 		case "backspace", "ctrl+h":

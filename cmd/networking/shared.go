@@ -12,6 +12,7 @@ type PlayerInfo struct {
 	PercentCompleted uint
 	Wpm              uint
 	ReadyToStart     bool
+	Disconnecting    bool
 }
 
 type Broadcast struct {
