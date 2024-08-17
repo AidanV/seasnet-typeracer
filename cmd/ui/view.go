@@ -16,38 +16,41 @@ func (m model) View() string {
 	var s string
 
 	var termWidth, termHeight = m.width, m.height
-	if m.test.results.Done {
-		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "The winner is "+m.test.results.Winner)
-	} else if m.test.completed {
-		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Done")
-	} else if m.test.started {
+	switch state := m.state.(type) {
+	case Test:
+		if state.results.Done {
+			s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "The winner is "+state.results.Winner)
+		} else if state.completed {
+			s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Done")
+		} else if state.started {
 
-		lineLenLimit := termWidth * 3 / 4
+			lineLenLimit := termWidth * 3 / 4
 
-		coloredStopwatch := style(time.Since(m.test.startTime).Round(time.Second).String(), m.styles.runningTimer)
+			coloredStopwatch := style(time.Since(state.startTime).Round(time.Second).String(), m.styles.runningTimer)
 
-		paragraphView := m.test.paragraphView(lineLenLimit, m.styles)
-		lines := strings.Split(paragraphView, "\n")
-		cursorLine := findCursorLine(strings.Split(paragraphView, "\n"), m.test.cursor)
+			paragraphView := state.paragraphView(lineLenLimit, m.styles)
+			lines := strings.Split(paragraphView, "\n")
+			cursorLine := findCursorLine(strings.Split(paragraphView, "\n"), state.cursor)
 
-		linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
+			linesAroundCursor := strings.Join(getLinesAroundCursor(lines, cursorLine), "\n")
 
-		s += positionVerticaly(termHeight)
-		avgLineLen := averageLineLen(lines)
-		indentBy := uint(math.Max(0, float64(termWidth/2-avgLineLen/2)))
+			s += positionVerticaly(termHeight)
+			avgLineLen := averageLineLen(lines)
+			indentBy := uint(math.Max(0, float64(termWidth/2-avgLineLen/2)))
 
-		s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
+			s += m.indent(coloredStopwatch, indentBy) + "\n\n" + m.indent(linesAroundCursor, indentBy)
 
-		s += "\n\n\n"
-		s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart, ctrl+q to menu", m.styles.toEnter))
-		s += "\n\n"
-		for _, prog := range m.progresses {
-			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.name) + "\n" + lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.prog.ViewAs(float64(prog.percentCompleted)/100.0)) + "\n"
+			s += "\n\n\n"
+			s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, style("ctrl+r to restart, ctrl+q to menu", m.styles.toEnter))
+			s += "\n\n"
+			for _, prog := range m.progresses {
+				s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.name) + "\n" + lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.prog.ViewAs(float64(prog.percentCompleted)/100.0)) + "\n"
+			}
+		} else if m.playerInfo.ReadyToStart {
+			s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Waiting for others...")
+		} else {
+			s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Press Enter to ready up")
 		}
-	} else if m.playerInfo.ReadyToStart {
-		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Waiting for others...")
-	} else {
-		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Press Enter to ready up")
 	}
 	return s
 }

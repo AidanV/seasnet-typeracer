@@ -25,7 +25,7 @@ func InitialModel(profile termenv.Profile, fore termenv.Color, name string, port
 	return model{
 		width:  termWidth,
 		height: termHeight,
-		test: Test{
+		state: Test{
 			started:       false,
 			wpmEachSecond: []float64{},
 			inputBuffer:   []rune{},

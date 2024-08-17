@@ -10,78 +10,82 @@ import (
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var commands []tea.Cmd
 
-	switch msg := msg.(type) {
+	switch state := m.state.(type) {
+	case Test:
+		switch msg := msg.(type) {
 
-	// Update window size
-	case tea.WindowSizeMsg:
-		if msg.Width == 0 && msg.Height == 0 {
-			return m, nil
-		} else {
-			m.width = msg.Width
-			m.height = msg.Height
-			return m, nil
-		}
-
-	case tea.KeyMsg:
-
-		switch msg.String() {
-		case "enter":
-			if !m.playerInfo.ReadyToStart {
-				m.playerInfo.ReadyToStart = true
+		// Update window size
+		case tea.WindowSizeMsg:
+			if msg.Width == 0 && msg.Height == 0 {
+				return m, nil
+			} else {
+				m.width = msg.Width
+				m.height = msg.Height
+				return m, nil
 			}
 
-		case "ctrl+c", "esc":
-			defer m.conn.Close()
-			m.playerInfo.Disconnecting = true
-			nw.PublishPlayerInfo(m.playerInfo, m.conn)
-			return m, tea.Quit
+		case tea.KeyMsg:
 
-		case "backspace", "ctrl+h":
-			m.test.handleBackspace()
+			switch msg.String() {
+			case "enter":
+				if !m.playerInfo.ReadyToStart {
+					m.playerInfo.ReadyToStart = true
+				}
 
-		case "ctrl+w":
-			m.test.handleCtrlW()
+			case "ctrl+c", "esc":
+				defer m.conn.Close()
+				m.playerInfo.Disconnecting = true
+				nw.PublishPlayerInfo(m.playerInfo, m.conn)
+				return m, tea.Quit
 
-		case " ":
-			if len(m.test.inputBuffer) < len(m.test.wordsToEnter) {
-				m.test.handleSpace()
-			}
+			case "backspace", "ctrl+h":
+				state.handleBackspace()
 
-		default:
-			switch msg.Type {
-			case tea.KeyRunes:
-				if len(m.test.inputBuffer) < len(m.test.wordsToEnter) {
-					m.test.handleRunes(msg)
+			case "ctrl+w":
+				state.handleCtrlW()
+
+			case " ":
+				if len(state.inputBuffer) < len(state.wordsToEnter) {
+					state.handleSpace()
+				}
+
+			default:
+				switch msg.Type {
+				case tea.KeyRunes:
+					if len(state.inputBuffer) < len(state.wordsToEnter) {
+						state.handleRunes(msg)
+					}
 				}
 			}
+
+		case nw.Broadcast:
+			state.wordsToEnter = []rune(msg.Paragraph)
+			m.progresses = []PlayerProg{}
+			state.started = msg.Started
+			state.startTime = msg.StartTime
+			if msg.Results.Done {
+				state.results.Done = true
+				state.results.Winner = msg.Results.Winner
+			}
+			for _, pi := range msg.PlayerInfos {
+				m.progresses = append(
+					m.progresses,
+					PlayerProg{
+						prog:             progress.New(),
+						name:             pi.Name,
+						percentCompleted: pi.PercentCompleted,
+					},
+				)
+			}
 		}
 
-	case nw.Broadcast:
-		m.test.wordsToEnter = []rune(msg.Paragraph)
-		m.progresses = []PlayerProg{}
-		m.test.started = msg.Started
-		m.test.startTime = msg.StartTime
-		if msg.Results.Done {
-			m.test.results.Done = true
-			m.test.results.Winner = msg.Results.Winner
-		}
-		for _, pi := range msg.PlayerInfos {
-			m.progresses = append(
-				m.progresses,
-				PlayerProg{
-					prog:             progress.New(),
-					name:             pi.Name,
-					percentCompleted: pi.PercentCompleted,
-				},
-			)
-		}
+		m.playerInfo.PercentCompleted = uint(100.0 * float64(state.calculateNumCorrect()) / float64(len(state.wordsToEnter)))
+		m.playerInfo.Wpm = uint(state.calculateNormalizedWpm())
+		state.completed = m.playerInfo.PercentCompleted == 100
+
+		m.state = state
+		nw.PublishPlayerInfo(m.playerInfo, m.conn)
 	}
-
-	m.playerInfo.PercentCompleted = uint(100.0 * float64(m.test.calculateNumCorrect()) / float64(len(m.test.wordsToEnter)))
-	m.playerInfo.Wpm = uint(m.test.calculateNormalizedWpm())
-	m.test.completed = m.playerInfo.PercentCompleted == 100
-
-	nw.PublishPlayerInfo(m.playerInfo, m.conn)
 
 	return m, tea.Batch(commands...)
 }

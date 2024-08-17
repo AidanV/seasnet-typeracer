@@ -24,13 +24,16 @@ type Styles struct {
 }
 
 type model struct {
-	test       Test
+	state      State
 	styles     Styles
 	width      int
 	height     int
 	progresses []PlayerProg
 	conn       net.Conn
 	playerInfo nw.PlayerInfo
+}
+
+type State interface {
 }
 
 type PlayerProg struct {
