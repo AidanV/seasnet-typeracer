@@ -113,6 +113,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		state.completed = m.playerInfo.PercentCompleted == 100
 
 		m.state = state
+	case Results:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+
+			switch msg.String() {
+			case "ctrl+c", "esc":
+				tea.Quit()
+			}
+		}
 	}
 
 	nw.PublishPlayerInfo(m.playerInfo, m.conn)
