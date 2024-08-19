@@ -42,17 +42,22 @@ type PlayerProg struct {
 	percentCompleted uint
 }
 
+type Lobby struct {
+}
+
 type Test struct {
-	started       bool
 	startTime     time.Time
 	wpmEachSecond []float64
 	inputBuffer   []rune
 	wordsToEnter  []rune
-	results       nw.Results
 	cursor        int
 	completed     bool // local test completition
 	mistakes      mistakes
 	rawInputCnt   int
+}
+
+type Results struct {
+	results nw.Results
 }
 
 type mistakes struct {

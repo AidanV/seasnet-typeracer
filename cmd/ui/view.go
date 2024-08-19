@@ -17,12 +17,17 @@ func (m model) View() string {
 
 	var termWidth, termHeight = m.width, m.height
 	switch state := m.state.(type) {
+	case Lobby:
+		if m.playerInfo.ReadyToStart {
+			s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Waiting for others...")
+		} else {
+			s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Press Enter to ready up")
+		}
+
 	case Test:
-		if state.results.Done {
-			s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "The winner is "+state.results.Winner)
-		} else if state.completed {
+		if state.completed {
 			s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Done")
-		} else if state.started {
+		} else {
 
 			lineLenLimit := termWidth * 3 / 4
 
@@ -46,11 +51,9 @@ func (m model) View() string {
 			for _, prog := range m.progresses {
 				s += lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.name) + "\n" + lipgloss.PlaceHorizontal(termWidth, lipgloss.Center, prog.prog.ViewAs(float64(prog.percentCompleted)/100.0)) + "\n"
 			}
-		} else if m.playerInfo.ReadyToStart {
-			s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Waiting for others...")
-		} else {
-			s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Press Enter to ready up")
 		}
+	case Results:
+		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "The winner is "+state.results.Winner)
 	}
 	return s
 }

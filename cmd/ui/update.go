@@ -11,6 +11,37 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var commands []tea.Cmd
 
 	switch state := m.state.(type) {
+	case Lobby:
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.String() {
+			case "enter":
+				if !m.playerInfo.ReadyToStart {
+					m.playerInfo.ReadyToStart = true
+				}
+			case "ctrl+c", "esc":
+				defer m.conn.Close()
+				m.playerInfo.Disconnecting = true
+				nw.PublishPlayerInfo(m.playerInfo, m.conn)
+				return m, tea.Quit
+			}
+		case nw.Broadcast:
+			if msg.Started {
+				m.state = Test{
+					startTime:     msg.StartTime,
+					wpmEachSecond: []float64{},
+					inputBuffer:   []rune(""),
+					wordsToEnter:  []rune(msg.Paragraph),
+					cursor:        0,
+					completed:     false,
+					mistakes: mistakes{
+						mistakesAt:     map[int]bool{},
+						rawMistakesCnt: 0,
+					},
+					rawInputCnt: 0,
+				}
+			}
+		}
 	case Test:
 		switch msg := msg.(type) {
 
@@ -28,9 +59,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			switch msg.String() {
 			case "enter":
-				if !m.playerInfo.ReadyToStart {
-					m.playerInfo.ReadyToStart = true
-				}
 
 			case "ctrl+c", "esc":
 				defer m.conn.Close()
@@ -61,11 +89,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case nw.Broadcast:
 			state.wordsToEnter = []rune(msg.Paragraph)
 			m.progresses = []PlayerProg{}
-			state.started = msg.Started
 			state.startTime = msg.StartTime
 			if msg.Results.Done {
-				state.results.Done = true
-				state.results.Winner = msg.Results.Winner
+				m.state = Results{
+					results: msg.Results,
+				}
+				break
 			}
 			for _, pi := range msg.PlayerInfos {
 				m.progresses = append(
@@ -84,9 +113,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		state.completed = m.playerInfo.PercentCompleted == 100
 
 		m.state = state
-		nw.PublishPlayerInfo(m.playerInfo, m.conn)
 	}
 
+	nw.PublishPlayerInfo(m.playerInfo, m.conn)
 	return m, tea.Batch(commands...)
 }
 

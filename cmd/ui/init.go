@@ -25,18 +25,7 @@ func InitialModel(profile termenv.Profile, fore termenv.Color, name string, port
 	return model{
 		width:  termWidth,
 		height: termHeight,
-		state: Test{
-			started:       false,
-			wpmEachSecond: []float64{},
-			inputBuffer:   []rune{},
-			wordsToEnter:  []rune(" "),
-			cursor:        0,
-			completed:     false,
-			mistakes: mistakes{
-				mistakesAt:     map[int]bool{},
-				rawMistakesCnt: 0,
-			},
-		},
+		state:  Lobby{},
 		styles: Styles{
 			correct: func(str string) termenv.Style {
 				return termenv.String(str).Foreground(fore)
