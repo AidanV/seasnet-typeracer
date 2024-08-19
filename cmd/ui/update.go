@@ -94,7 +94,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state = Results{
 					results: msg.Results,
 				}
-				break
+				return m, tea.Batch(commands...)
 			}
 			for _, pi := range msg.PlayerInfos {
 				m.progresses = append(
@@ -121,6 +121,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "ctrl+c", "esc":
 				tea.Quit()
 			}
+
 		}
 	}
 
