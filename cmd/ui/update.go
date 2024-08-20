@@ -117,7 +117,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
 
-			switch msg.String() {
+			switch msg.String() { // TODO: fix unable to  leave
 			case "ctrl+c", "esc":
 				tea.Quit()
 			}
