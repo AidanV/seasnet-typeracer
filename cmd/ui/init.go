@@ -33,11 +33,16 @@ func InitialModel(profile termenv.Profile, fore termenv.Color) model {
 			title:    "Join a game",
 		},
 	}
+	l := list.New(items, itemDelegate{}, 20, 6)
+	l.SetFilteringEnabled(false)
+	l.SetShowStatusBar(false)
+	l.SetShowTitle(false)
+	l.SetShowHelp(false)
 	return model{
 		width:  termWidth,
 		height: termHeight,
 		state: Setup{
-			list: list.New(items, itemDelegate{}, 20, 2),
+			list: l,
 		},
 		styles: Styles{
 			correct: func(str string) termenv.Style {
