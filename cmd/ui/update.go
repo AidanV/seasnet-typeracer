@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"net"
 	nw "typeracer/cmd/networking"
 
 	"github.com/charmbracelet/bubbles/progress"
@@ -11,6 +12,34 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var commands []tea.Cmd
 
 	switch state := m.state.(type) {
+	case Setup:
+		switch msg := msg.(type) {
+		case tea.WindowSizeMsg:
+			state.list.SetWidth(msg.Width)
+			return m, nil
+
+		case tea.KeyMsg:
+			switch keypress := msg.String(); keypress {
+			case "q", "ctrl+c":
+				return m, tea.Quit
+
+			case "enter":
+				i, ok := state.list.SelectedItem().(item)
+				if ok {
+					if i.isServer {
+						go nw.InitServer(8000)
+					}
+					go nw.InitClient(m.playerInfo, 8000)
+				}
+				m.state = Lobby{}
+				return m, tea.Quit
+			}
+		}
+
+		var cmd tea.Cmd
+		state.list, cmd = state.list.Update(msg)
+		m.state = state
+		return m, cmd
 	case Lobby:
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
@@ -20,9 +49,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					m.playerInfo.ReadyToStart = true
 				}
 			case "ctrl+c", "esc":
-				defer m.conn.Close()
-				m.playerInfo.Disconnecting = true
-				nw.PublishPlayerInfo(m.playerInfo, m.conn)
+				switch conn := m.conn.(type) {
+				case Disconnected:
+				case net.Conn:
+					defer conn.Close()
+					m.playerInfo.Disconnecting = true
+					nw.PublishPlayerInfo(m.playerInfo, conn)
+				}
 				return m, tea.Quit
 			}
 		case nw.Broadcast:
@@ -61,9 +94,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			case "enter":
 
 			case "ctrl+c", "esc":
-				defer m.conn.Close()
-				m.playerInfo.Disconnecting = true
-				nw.PublishPlayerInfo(m.playerInfo, m.conn)
+				switch conn := m.conn.(type) {
+				case Disconnected:
+				case net.Conn:
+					defer conn.Close()
+					m.playerInfo.Disconnecting = true
+					nw.PublishPlayerInfo(m.playerInfo, conn)
+				}
 				return m, tea.Quit
 
 			case "backspace", "ctrl+h":
@@ -125,7 +162,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	nw.PublishPlayerInfo(m.playerInfo, m.conn)
+	switch conn := m.conn.(type) {
+	case Disconnected:
+	case net.Conn:
+		nw.PublishPlayerInfo(m.playerInfo, conn)
+
+	}
 	return m, tea.Batch(commands...)
 }
 

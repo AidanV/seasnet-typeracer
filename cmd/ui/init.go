@@ -4,6 +4,7 @@ import (
 	"os"
 	nw "typeracer/cmd/networking"
 
+	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/muesli/termenv"
 	"golang.org/x/term"
@@ -13,19 +14,31 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func InitialModel(profile termenv.Profile, fore termenv.Color, name string, port int) model {
+func InitialModel(profile termenv.Profile, fore termenv.Color) model {
 	termWidth, termHeight, _ := term.GetSize(int(os.Stdin.Fd()))
 	playerInfo := nw.PlayerInfo{
-		Name:             name,
+		Name:             "",
 		PercentCompleted: 0,
 		Wpm:              0,
 		ReadyToStart:     false,
 		Disconnecting:    false,
 	}
+	items := []list.Item{
+		item{
+			isServer: true,
+			title:    "Create a lobby",
+		},
+		item{
+			isServer: false,
+			title:    "Join a game",
+		},
+	}
 	return model{
 		width:  termWidth,
 		height: termHeight,
-		state:  Lobby{},
+		state: Setup{
+			list: list.New(items, itemDelegate{}, 20, 2),
+		},
 		styles: Styles{
 			correct: func(str string) termenv.Style {
 				return termenv.String(str).Foreground(fore)
@@ -53,10 +66,7 @@ func InitialModel(profile termenv.Profile, fore termenv.Color, name string, port
 			},
 		},
 		progresses: []PlayerProg{},
-		conn: nw.InitClient(
-			playerInfo,
-			port,
-		),
+		conn:       Disconnected{},
 		playerInfo: playerInfo,
 	}
 }
