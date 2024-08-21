@@ -29,10 +29,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					if i.isServer {
 						go nw.InitServer(8000)
 					}
-					go nw.InitClient(m.playerInfo, 8000)
+					m.conn = nw.InitClient(m.playerInfo, 8000)
 				}
 				m.state = Lobby{}
-				return m, tea.Quit
+				return m, nil
 			}
 		}
 
