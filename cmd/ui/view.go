@@ -18,7 +18,7 @@ func (m model) View() string {
 	var termWidth, termHeight = m.width, m.height
 	switch state := m.state.(type) {
 	case Setup:
-		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, state.list.View())
+		s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Name: \n\n"+state.list.View())
 	case Lobby:
 		if m.playerInfo.ReadyToStart {
 			s += lipgloss.Place(termWidth, termHeight, lipgloss.Center, lipgloss.Center, "Waiting for others...")
